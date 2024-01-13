@@ -1,0 +1,10 @@
+{
+  "sepolia": {
+    "router": "0x02b8a0F026FaA2621e102CE2118f79d956446985",
+    "tokenType": "native"
+  },
+  "incotestnet": {
+    "router": "0x729fb6b0ae77f2E043F024e801970796516Eb2B0",
+    "tokenType": "synthetic"
+  }
+}

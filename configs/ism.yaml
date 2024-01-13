@@ -1,0 +1,5 @@
+incotestnet:
+  threshold: 1
+  validators:
+    - "0x264f9EF85C21DE49451c3636116668889Ca41aab"
+

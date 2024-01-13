@@ -1,0 +1,8 @@
+incotestnet:
+  name: incotestnet
+  chainId: 9090
+  domainId: 9090
+  protocol: ethereum
+  rpcUrls:
+    - http: https://evm-rpc.inco.network
+
