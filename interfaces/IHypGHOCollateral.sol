@@ -28,7 +28,7 @@ interface IHypGHOCollateral {
 
     function setInterchainSecurityModule(
         address _module
-    ) public;
+    ) external;
 
     function transferRemote(
         uint32 _destination,

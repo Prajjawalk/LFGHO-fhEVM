@@ -29,7 +29,7 @@ contract BridgeFacilitator is AccessControl {
         require(amount > 0, "No GHO sent");
 
         // lock GHO and mint wrapped GHO on fhEVM
-        require(router.transferRemote(_destinationChain, bytes32(uint256(uint160(_recipient))), amount), "Transfer failed");
+        require(router.transferRemote(_destinationChain, bytes32(uint256(uint160(_recipient))), amount) != "", "Transfer failed");
         totalLockedGho += amount;
         userLockedGho[msg.sender] += amount;
         emit GhoLocked(msg.sender, amount);
