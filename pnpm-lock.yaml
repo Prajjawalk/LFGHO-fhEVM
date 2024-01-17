@@ -10,6 +10,9 @@ dependencies:
   '@openzeppelin/contracts':
     specifier: ^4.9.2
     version: 4.9.2
+  '@openzeppelin/contracts-upgradeable':
+    specifier: ^4.9.5
+    version: 4.9.5
 
 devDependencies:
   '@nomicfoundation/hardhat-chai-matchers':
