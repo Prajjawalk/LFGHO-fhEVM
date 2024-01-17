@@ -1,7 +1,7 @@
 base:
   chainName: sepolia
-  type: native
-  address: "0x0000000000000000000000000000000000000000"
+  type: collateral
+  address: "0xc4bF5CbDaBE595361438F8c6a187bDc330539c60"
   isNft: false
 synthetics:
   - chainName: incotestnet

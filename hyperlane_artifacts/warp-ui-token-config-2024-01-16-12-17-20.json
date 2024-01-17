@@ -1,0 +1,10 @@
+{
+  "chainId": 11155111,
+  "name": "Gho Token",
+  "symbol": "GHO",
+  "decimals": 18,
+  "type": "collateral",
+  "address": "0xc4bF5CbDaBE595361438F8c6a187bDc330539c60",
+  "hypCollateralAddress": "0x2123DFF02C8978E055ae5f09C787Ac18A22c17A3",
+  "isNft": false
+}

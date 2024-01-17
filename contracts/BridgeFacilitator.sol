@@ -3,6 +3,7 @@ pragma solidity ^0.8.4;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
+import { IHypGHOCollateral } from "../interfaces/IHypGHOCollateral.sol";
 
 // facilitates the locking and unlocking of collateral on EVM
 // triggers corresponding mint/burn actions for wrapped GHO on fhEVM via cross chain messaging
@@ -13,35 +14,38 @@ contract BridgeFacilitator is AccessControl {
     mapping(address user => uint256 amountLocked) private userLockedGho;
 
     IERC20 public ghoToken;
+    IHypGHOCollateral public router;
 
     event GhoLocked(address indexed user, uint256 amount);
     event GhoUnlocked(address indexed user, uint256 amount);
 
-    constructor(IERC20 _ghoToken) {
+    constructor(address _ghoToken, address _router) {
         grantRole(ADMIN_ROLE, msg.sender);
-        ghoToken = _ghoToken;
+        ghoToken = IERC20(_ghoToken);
+        router = IHypGHOCollateral(_router);
     }
 
-    function lockGho(uint256 amount) external {
+    function lockGho(uint256 amount, uint32 _destinationChain, address _recipient) external {
         require(amount > 0, "No GHO sent");
-        require(ghoToken.transferFrom(msg.sender, address(this), amount), "Transfer failed");
+
+        // lock GHO and mint wrapped GHO on fhEVM
+        require(router.transferRemote(_destinationChain, bytes32(uint256(uint160(_recipient))), amount), "Transfer failed");
         totalLockedGho += amount;
         userLockedGho[msg.sender] += amount;
         emit GhoLocked(msg.sender, amount);
-
-        // mint wrapped GHO on fhEVM
     }
 
-    function unlockGho(uint256 amount) external {
-        require(amount > 0, "No GHO sent");
-        require(userLockedGho[msg.sender] >= amount, "Insufficient collateral");
-        totalLockedGho -= amount;
-        userLockedGho[msg.sender] -= amount;
-        require(ghoToken.transfer(msg.sender, amount), "Transfer failed");
-        emit GhoUnlocked(msg.sender, amount);
+    // Unlock will take place on fhEVM side
+    // function unlockGho(uint256 amount) external {
+    //     require(amount > 0, "No GHO sent");
+    //     require(userLockedGho[msg.sender] >= amount, "Insufficient collateral");
+    //     totalLockedGho -= amount;
+    //     userLockedGho[msg.sender] -= amount;
+    //     require(ghoToken.transfer(msg.sender, amount), "Transfer failed");
+    //     emit GhoUnlocked(msg.sender, amount);
 
-        // burn wrapped GHO on fhEVM
-    }
+    //     // burn wrapped GHO on fhEVM
+    // }
 
     function getUserLockedGho(address user) external view returns (uint256) {
         return userLockedGho[user];

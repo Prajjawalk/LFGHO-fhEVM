@@ -60,8 +60,16 @@ const config: HardhatUserConfig = {
     src: "./contracts",
   },
   networks: {
+    sepolia: {
+      url: process.env.SEPOLIA_URL || "",
+      accounts: process.env.SEPOLIA_PRIVATE_KEY !== undefined ? [process.env.SEPOLIA_PRIVATE_KEY] : [],
+    },
     zama: getChainConfig("zama"),
     local: getChainConfig("local"),
+    inco: {
+      url: process.env.INCO_URL || "",
+      accounts: process.env.INCO_PRIVATE_KEY !== undefined ? [process.env.INCO_PRIVATE_KEY] : [],
+    },
   },
   paths: {
     artifacts: "./artifacts",
