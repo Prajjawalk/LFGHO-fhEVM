@@ -1,3 +1,4 @@
+import { ConnectKitButton } from "connectkit";
 import Link from "next/link";
 
 export default function Navbar() {
@@ -16,6 +17,7 @@ export default function Navbar() {
             >
               Connect Wallet
             </button>
+            <ConnectKitButton></ConnectKitButton>
             <button
               data-collapse-toggle="navbar-cta"
               type="button"

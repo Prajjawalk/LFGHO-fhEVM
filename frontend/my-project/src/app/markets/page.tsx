@@ -1,9 +1,8 @@
-import Navbar from "../navbar/page";
+import Navbar from "../navbar/Navbar";
 
 export default function Markets() {
   return (
     <>
-      <Navbar></Navbar>
       <h1>Market</h1>
     </>
   );
