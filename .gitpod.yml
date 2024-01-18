@@ -1,7 +1,7 @@
 image: "gitpod/workspace-node:latest"
 
 tasks:
-  - init: "pnpm install"
+  - init: "cd frontend/my-project && npm i"
 
 vscode:
   extensions:
