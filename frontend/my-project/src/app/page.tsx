@@ -1,7 +1,6 @@
 "use client";
 
 import Dashboard from "./dashboard/Dashboard";
-import { Button } from "@/components/ui/button";
 import { useAccount } from "wagmi";
 
 export default function Home() {
