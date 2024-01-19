@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import { IGhoToken } from "./interfaces/IGhoToken.sol";
-import { IPrivateGho } from "./interfaces/IPrivateGho.sol";
+import { IPrivateGHO } from "./interfaces/IPrivateGHO.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import "fhevm/abstracts/EIP712WithModifier.sol";
@@ -12,7 +12,7 @@ import "fhevm/lib/TFHE.sol";
 // total mintable cap will be set to the amount of gho received from the bridge
 
 contract FHEVMFacilitator is EIP712WithModifier {
-    IPrivateGho public privateGho;
+    IGhoToken public privateGho;
     IERC20 public usdcToken; // mock USDC
     IERC20 public hypGhoToken; // wrapped GHO
     // euint32 internal totalMintableCap; // matches the amount of gho bridged
@@ -22,13 +22,13 @@ contract FHEVMFacilitator is EIP712WithModifier {
     mapping(address user => euint32 borrowed) public ghoBorrowed;
 
     constructor(
-        IPrivateGho _privateGho,
+        IPrivateGHO _privateGho,
         IERC20 _usdcToken,
-        IERC20 _hypGHOToken,
+        IERC20 _hypGHOToken
     ) EIP712WithModifier("FHEVMFacilitator", "1") {
         privateGho = _privateGho;
         usdcToken = _usdcToken;
-        hypGHOToken = _hypGHOToken;
+        hypGhoToken = _hypGHOToken;
     }
 
     // TODO: function to receive hypGHO
@@ -55,7 +55,7 @@ contract FHEVMFacilitator is EIP712WithModifier {
         euint32 amount = TFHE.asEuint32(encryptedAmount);
         ebool hasEnoughCollateral = TFHE.le(TFHE.add(ghoBorrowed[account], amount), collateralSupplied[account]);
         currentMinted = TFHE.add(currentMinted, amount);
-        ebool withinMintableCap = TFHE.le(currentMinted, TFHE.asEuint32(hypGHOToken.totalSupply()));
+        ebool withinMintableCap = TFHE.le(currentMinted, TFHE.asEuint32(hypGhoToken.totalSupply()));
         privateGho.mint(account, amount);
         ghoBorrowed[account] = TFHE.add(ghoBorrowed[account], amount);
         TFHE.optReq(hasEnoughCollateral);
@@ -80,7 +80,10 @@ contract FHEVMFacilitator is EIP712WithModifier {
         euint32 currentCollateral = collateralSupplied[account];
         euint32 remainingCollateralCapacity = TFHE.sub(currentCollateral, currentBorrowed);
 
-        euint32 maxMintable = TFHE.min(remainingCollateralCapacity, TFHE.sub(TFHE.asEuint32(hypGHOToken.totalSupply()), currentMinted));
+        euint32 maxMintable = TFHE.min(
+            remainingCollateralCapacity,
+            TFHE.sub(TFHE.asEuint32(hypGhoToken.totalSupply()), currentMinted)
+        );
         return TFHE.reencrypt(maxMintable, publicKey);
     }
 }

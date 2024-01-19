@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { IGhoToken } from "./interfaces/IGhoToken.sol";
+import { IGhoToken } from "./IGhoToken.sol";
 import { EIP712WithModifier } from "fhevm/abstracts/EIP712WithModifier.sol";
 
-contract PrivateGHO is IGhoToken, EIP712WithModifier {
+interface IPrivateGHO is IGhoToken, EIP712WithModifier {
     string private _name;
     string private _symbol;
 
@@ -13,10 +13,10 @@ contract PrivateGHO is IGhoToken, EIP712WithModifier {
 
     function BUCKET_MANAGER_ROLE() external pure override returns (bytes32) {}
 
-    constructor() EIP712WithModifier("Authorization token", "1") {
-        _name = "PrivateGHO";
-        _symbol = "pGHO";
-    }
+    // constructor() EIP712WithModifier("Authorization token", "1") {
+    //     _name = "PrivateGHO";
+    //     _symbol = "pGHO";
+    // }
 
     function mint(address account, uint256 amount) external override {}
 
