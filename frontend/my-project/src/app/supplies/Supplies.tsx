@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 
 interface table {
   index: number;
@@ -53,9 +52,9 @@ const tableData: table[] = [
 export default function Supplies() {
   return (
     <>
-      <div className="mx-auto max-w-7xl pt-10 px-6" id="exchange-section">
+      <div className="mx-auto max-w-7xl pt-3 px-6" id="exchange-section">
         <div className="table-b bg-navyblue p-8 overflow-x-auto">
-          <h3 className="text-offwhite text-2xl">Assets to supply</h3>
+          <h3 className="text-offwhite text-2xl">Assets to supply ➤</h3>
           <table className="table-auto w-full mt-10">
             <thead>
               <tr className="text-white bg-darkblue rounded-lg">
