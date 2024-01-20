@@ -2,7 +2,6 @@
 pragma solidity ^0.8.19;
 
 import { IGhoToken } from "./interfaces/IGhoToken.sol";
-import { IPrivateGHO } from "./interfaces/IPrivateGHO.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import "fhevm/abstracts/EIP712WithModifier.sol";
@@ -22,7 +21,7 @@ contract FHEVMFacilitator is EIP712WithModifier {
     mapping(address user => euint32 borrowed) public ghoBorrowed;
 
     constructor(
-        IPrivateGHO _privateGho,
+        IGhoToken _privateGho,
         IERC20 _usdcToken,
         IERC20 _hypGHOToken
     ) EIP712WithModifier("FHEVMFacilitator", "1") {
@@ -56,7 +55,7 @@ contract FHEVMFacilitator is EIP712WithModifier {
         ebool hasEnoughCollateral = TFHE.le(TFHE.add(ghoBorrowed[account], amount), collateralSupplied[account]);
         currentMinted = TFHE.add(currentMinted, amount);
         ebool withinMintableCap = TFHE.le(currentMinted, TFHE.asEuint32(hypGhoToken.totalSupply()));
-        privateGho.mint(account, amount);
+        privateGho.mint(account, encryptedAmount);
         ghoBorrowed[account] = TFHE.add(ghoBorrowed[account], amount);
         TFHE.optReq(hasEnoughCollateral);
         TFHE.optReq(withinMintableCap);
@@ -66,7 +65,7 @@ contract FHEVMFacilitator is EIP712WithModifier {
         euint32 amount = TFHE.asEuint32(encryptedAmount);
         ebool sufficientBalance = TFHE.le(amount, privateGho.encryptedBalance(account));
         TFHE.optReq(sufficientBalance);
-        privateGho.burn(account, amount);
+        privateGho.burn(account, encryptedAmount);
         ghoBorrowed[account] = TFHE.sub(ghoBorrowed[account], amount);
         currentMinted = TFHE.sub(currentMinted, amount);
     }

@@ -1,18 +1,20 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity 0.8.19;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IAccessControl } from "@openzeppelin/contracts/access/IAccessControl.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "fhevm/abstracts/EIP712WithModifier.sol";
+import "fhevm/lib/TFHE.sol";
 
 /**
  * @title IGhoToken
  */
-interface IGhoToken is IERC20, IAccessControl {
+interface IGhoToken is IAccessControl {
     struct Facilitator {
-        uint128 bucketCapacity;
-        uint128 bucketLevel;
         string label;
+        euint32 bucketCapacity;
+        euint32 bucketLevel;
     }
 
     /**
@@ -66,17 +68,17 @@ interface IGhoToken is IERC20, IAccessControl {
      * @dev Only facilitators with enough bucket capacity available can mint.
      * @dev The bucket level is increased upon minting.
      * @param account The address receiving the GHO tokens
-     * @param amount The amount to mint
+     * @param encryptedAmount The amount to mint
      */
-    function mint(bytes calldata encryptedAmount) external;
+    function mint(address account, bytes calldata encryptedAmount) external;
 
     /**
      * @notice Burns the requested amount of tokens from the account address.
      * @dev Only active facilitators (bucket level > 0) can burn.
      * @dev The bucket level is decreased upon burning.
-     * @param amount The amount to burn
+     * @param encryptedAmount The amount to burn
      */
-    function burn(bytes calldata encryptedAmount) external;
+    function burn(address account, bytes calldata encryptedAmount) external;
 
     /**
      * @notice Add the facilitator passed with the parameters to the facilitators list.
@@ -88,7 +90,7 @@ interface IGhoToken is IERC20, IAccessControl {
     function addFacilitator(
         address facilitatorAddress,
         string calldata facilitatorLabel,
-        uint128 bucketCapacity
+        bytes calldata bucketCapacity
     ) external;
 
     /**
@@ -104,14 +106,14 @@ interface IGhoToken is IERC20, IAccessControl {
      * @param facilitator The address of the facilitator
      * @param newCapacity The new capacity of the bucket
      */
-    function setFacilitatorBucketCapacity(address facilitator, uint128 newCapacity) external;
+    function setFacilitatorBucketCapacity(address facilitator, bytes calldata newCapacity) external;
 
     /**
      * @notice Returns the facilitator data
      * @param facilitator The address of the facilitator
      * @return The facilitator configuration
      */
-    function getFacilitator(address facilitator) external view returns (Facilitator memory);
+    // function getFacilitator(address facilitator) external view returns (Facilitator memory);
 
     /**
      * @notice Returns the bucket configuration of the facilitator
@@ -119,7 +121,7 @@ interface IGhoToken is IERC20, IAccessControl {
      * @return The capacity of the facilitator's bucket
      * @return The level of the facilitator's bucket
      */
-    function getFacilitatorBucket(address facilitator) external view returns (uint256, uint256);
+    function getFacilitatorBucket(address facilitator, bytes32 publicKey) external returns (bytes memory, bytes memory);
 
     /**
      * @notice Returns the list of the addresses of the active facilitator
@@ -131,11 +133,11 @@ interface IGhoToken is IERC20, IAccessControl {
 
     function transfer(address to, bytes calldata encryptedAmount) external;
 
-    function transfer(address to, euint32 amount) external;
-
     function getTotalSupply(bytes32 publicKey, bytes calldata signature) external returns (bytes memory);
 
     function balanceOf(bytes32 publicKey, bytes calldata signature) external returns (bytes memory);
+
+    function encryptedBalance(address account) external returns (euint32);
 
     function approve(address spender, bytes calldata encryptedAmount) external;
 
@@ -143,5 +145,5 @@ interface IGhoToken is IERC20, IAccessControl {
 
     function transferFrom(address from, address to, bytes calldata encryptedAmount) external;
 
-    function transferFrom(address from, address to, euint32 amount) external;
+    // function transferFrom(address from, address to, euint32 amount) external;
 }

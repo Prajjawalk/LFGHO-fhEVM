@@ -4,10 +4,12 @@ pragma solidity 0.8.19;
 
 import "fhevm/abstracts/EIP712WithModifier.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 
 import "fhevm/lib/TFHE.sol";
+import { IGhoToken } from "./interfaces/IGhoToken.sol";
 
-contract EncryptedERC20 is EIP712WithModifier {
+contract EncryptedERC20 is EIP712WithModifier, AccessControl, IGhoToken {
     euint32 private totalSupply;
     string public constant name = "GHO Private Token";
     string public constant symbol = "GHO";
@@ -94,6 +96,10 @@ contract EncryptedERC20 is EIP712WithModifier {
         return TFHE.reencrypt(balances[msg.sender], publicKey, 0);
     }
 
+    function encryptedBalance(address account) external view returns (euint32) {
+        return balances[account];
+    }
+
     // Sets the `encryptedAmount` as the allowance of `spender` over the caller's tokens.
     function approve(address spender, bytes calldata encryptedAmount) public {
         address owner = msg.sender;
@@ -159,13 +165,12 @@ contract EncryptedERC20 is EIP712WithModifier {
         string calldata facilitatorLabel,
         bytes calldata bucketCapacity
     ) external onlyRole(FACILITATOR_MANAGER_ROLE) {
-        euint32 bucketCapacity = TFHE.asEuint32(bucketCapacity);
         Facilitator storage facilitator = _facilitators[facilitatorAddress];
         require(bytes(facilitator.label).length == 0, "FACILITATOR_ALREADY_EXISTS");
         require(bytes(facilitatorLabel).length > 0, "INVALID_LABEL");
 
         facilitator.label = facilitatorLabel;
-        facilitator.bucketCapacity = bucketCapacity;
+        facilitator.bucketCapacity = TFHE.asEuint32(bucketCapacity);
 
         _facilitatorsList.add(facilitatorAddress);
 
@@ -174,7 +179,7 @@ contract EncryptedERC20 is EIP712WithModifier {
 
     function removeFacilitator(address facilitatorAddress) external onlyRole(FACILITATOR_MANAGER_ROLE) {
         require(bytes(_facilitators[facilitatorAddress].label).length > 0, "FACILITATOR_DOES_NOT_EXIST");
-        require(_facilitators[facilitatorAddress].bucketLevel == 0, "FACILITATOR_BUCKET_LEVEL_NOT_ZERO");
+        require(TFHE.decrypt(_facilitators[facilitatorAddress].bucketLevel) == 0, "FACILITATOR_BUCKET_LEVEL_NOT_ZERO");
 
         delete _facilitators[facilitatorAddress];
         _facilitatorsList.remove(facilitatorAddress);
@@ -187,9 +192,9 @@ contract EncryptedERC20 is EIP712WithModifier {
         bytes calldata newCapacity
     ) external onlyRole(BUCKET_MANAGER_ROLE) {
         require(bytes(_facilitators[facilitator].label).length > 0, "FACILITATOR_DOES_NOT_EXIST");
-        euint32 = TFHE.asEuint32(newCapacity);
+        euint32 newCapacity = TFHE.asEuint32(newCapacity);
 
-        euint32 oldCapacity = _facilitators[facilitator].bucketCapacity;
+        // euint32 oldCapacity = _facilitators[facilitator].bucketCapacity;
         _facilitators[facilitator].bucketCapacity = newCapacity;
 
         // emit FacilitatorBucketCapacityUpdated(facilitator, oldCapacity, newCapacity);
