@@ -1,25 +1,16 @@
-import { task } from "hardhat/config";
-import type { TaskArguments } from "hardhat/types";
+// import { task } from "hardhat/config";
+// import type { TaskArguments } from "hardhat/types";
 
-import { createInstances } from "../test/instance";
-import { Signers, getSigners } from "../test/signers";
-import { FhevmInstances } from "../test/types";
+// task("task:mint")
+//   .addParam("mint", "Tokens to mint")
+//   .setAction(async function (taskArguments: TaskArguments, hre) {
+//     const { ethers, deployments } = hre;
+//     const signers = await ethers.getSigners();
+//     const ConfidentialERC20 = await deployments.get("ConfidentialERC20");
 
-task("task:mint")
-  .addParam("mint", "Tokens to mint")
-  .addParam("account", "Specify which account [alice, bob, carol, dave]")
-  .setAction(async function (taskArguments: TaskArguments, hre) {
-    const { ethers, deployments } = hre;
-    const EncryptedERC20 = await deployments.get("EncryptedERC20");
-    const signers = await getSigners(ethers);
+//     const encryptedERC20 = await ethers.getContractAt("ConfidentialERC20", ConfidentialERC20.address);
 
-    const instances = await createInstances(EncryptedERC20.address, ethers, signers);
+//     await encryptedERC20.connect(signers[0]).mint(+taskArguments.mint);
 
-    const encryptedERC20 = await ethers.getContractAt("EncryptedERC20", EncryptedERC20.address);
-
-    await encryptedERC20
-      .connect(signers[taskArguments.account as keyof Signers])
-      .mint(instances[taskArguments.account as keyof FhevmInstances].encrypt32(+taskArguments.mint));
-
-    console.log("Mint done: ", taskArguments.mint);
-  });
+//     console.log("Mint done: ", taskArguments.mint);
+//   });

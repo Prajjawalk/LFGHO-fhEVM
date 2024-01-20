@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause-Clear
 
-pragma solidity 0.8.19;
+pragma solidity ^0.8.20;
 
 import "fhevm/abstracts/EIP712WithModifier.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -9,7 +9,7 @@ import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol"
 import "fhevm/lib/TFHE.sol";
 import { IGhoToken } from "./interfaces/IGhoToken.sol";
 
-contract EncryptedERC20 is EIP712WithModifier, AccessControl, IGhoToken {
+contract EncryptedGHO is EIP712WithModifier, AccessControl, IGhoToken {
     euint32 private totalSupply;
     string public constant name = "GHO Private Token";
     string public constant symbol = "GHO";
@@ -38,9 +38,11 @@ contract EncryptedERC20 is EIP712WithModifier, AccessControl, IGhoToken {
     /// @inheritdoc IGhoToken
     bytes32 public constant BUCKET_MANAGER_ROLE = keccak256("BUCKET_MANAGER_ROLE");
 
-    constructor(address admin) EIP712WithModifier("GHO token", "1") {
+    constructor(address admin, address facilitatorManager, address bucketManager) EIP712WithModifier("GHO token", "1") {
         contractOwner = msg.sender;
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
+        _setupRole(FACILITATOR_MANAGER_ROLE, facilitatorManager);
+        _setupRole(BUCKET_MANAGER_ROLE, bucketManager);
     }
 
     // Sets the balance of the owner to the given encrypted balance.
