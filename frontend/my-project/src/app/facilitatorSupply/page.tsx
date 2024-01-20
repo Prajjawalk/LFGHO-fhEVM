@@ -1,16 +1,12 @@
 "use client";
 
 import { useAccount } from "wagmi";
-import LandingPage from "./landingPage/LandingPage";
-import Supplies from "./supplies/page";
+import LandingPage from '../landingPage/LandingPage';
 
-
-export default function Home() {
+export default function  FacilitatorSupply() {
   const { address, isDisconnected, isConnecting } = useAccount();
   if (isDisconnected || isConnecting) return <LandingPage></LandingPage>;
   return (
-    <>
-      <Supplies></Supplies>
-    </>
-  );
+    <div className="mt-96">Facilitator Supply</div>
+  )
 }

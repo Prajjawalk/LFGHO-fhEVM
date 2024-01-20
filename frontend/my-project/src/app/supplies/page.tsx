@@ -1,4 +1,9 @@
+"use client";
+
+import { useAccount } from "wagmi";
 import Image from "next/image";
+import Navigation from "../navigation/Navigation";
+import LandingPage from "../landingPage/LandingPage";
 
 interface table {
   index: number;
@@ -50,8 +55,11 @@ const tableData: table[] = [
 ];
 
 export default function Supplies() {
+  const { address, isDisconnected, isConnecting } = useAccount();
+  if (isDisconnected || isConnecting) return <LandingPage></LandingPage>;
   return (
     <>
+    <Navigation></Navigation>
       <div className="mx-auto max-w-7xl pt-3 px-6" id="exchange-section">
         <div className="table-b bg-navyblue p-8 overflow-x-auto">
           <h3 className="text-offwhite text-2xl">Assets to supply ➤</h3>
