@@ -5,7 +5,6 @@ import { getSigners } from "../signers";
 
 export async function deployEncryptedGHOFixture(): Promise<EncryptedGHO> {
   const signers = await getSigners();
-  console.log(signers);
 
   const contractFactory = await ethers.getContractFactory("EncryptedGHO");
   const contract = await contractFactory

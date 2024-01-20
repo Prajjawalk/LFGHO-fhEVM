@@ -2,13 +2,15 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 import { createInstances } from "../instance";
-import { getSigners } from "../signers";
+import { getSigners, initSigners } from "../signers";
 import { deployEncryptedGHOFixture } from "./EncryptedGHO.fixture";
 
 describe("EncryptedGHO", function () {
   before(async function () {
+    await initSigners();
     this.signers = await getSigners();
   });
+
 
   beforeEach(async function () {
     const contract = await deployEncryptedGHOFixture();
