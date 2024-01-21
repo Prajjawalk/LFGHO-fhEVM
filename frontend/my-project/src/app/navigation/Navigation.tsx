@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Navigation() {
   return (
-    <div className="inline-flex lg:ml-80 ml-5 mt-28 rounded-md shadow-sm" role="group">
+    <div className="flex justify-center items-center mt-28 rounded-md shadow-sm" role="group">
 
     <Link href="/supplies">
         <button
