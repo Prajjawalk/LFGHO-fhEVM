@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import { IGhoToken } from "./interfaces/IGhoToken.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -7,37 +7,55 @@ import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import "fhevm/abstracts/EIP712WithModifier.sol";
 import "fhevm/lib/TFHE.sol";
 
-// this contract will receive the gho from bridge
-// total mintable cap will be set to the amount of gho received from the bridge
-
+/**
+ * @title FHEVMFacilitator
+ * @dev This contract will receive wrapped gho from evm bridge and allow the minting of Private GHO on fhEVM after sufficient collateral is supplied
+ */
 contract FHEVMFacilitator is EIP712WithModifier {
     IGhoToken public privateGho;
     IERC20 public usdcToken; // mock USDC
-    IERC20 public hypGhoToken; // wrapped GHO
-    // euint32 internal totalMintableCap; // matches the amount of gho bridged
+    IERC20 public hypGhoToken; // wrapped bridged GHO
     euint32 internal currentMinted;
 
     mapping(address user => euint32 collateral) public collateralSupplied;
     mapping(address user => euint32 borrowed) public ghoBorrowed;
 
+    /**
+     * @dev Initializes the contract by setting the privateGho, usdcToken, and hypGhoToken.
+     * @param _privateGho The address of the Private GHO token
+     * @param _usdcToken The address of the USDC collateral token
+     * @param _hypGHOToken The address of the bridged GHO token
+     */
     constructor(
         IGhoToken _privateGho,
         IERC20 _usdcToken,
         IERC20 _hypGHOToken
-    ) EIP712WithModifier("FHEVMFacilitator", "1") {
+    ) EIP712WithModifier("Authorization token", "1") {
         privateGho = _privateGho;
         usdcToken = _usdcToken;
         hypGhoToken = _hypGHOToken;
     }
 
-    // TODO: function to receive hypGHO
-
+    /**
+     * @dev Allows a user to supply USDC as collateral.
+     * @param amount The amount of USDC to supply.
+     *
+     * Requirements:
+     * - The caller must have enough USDC balance.
+     */
     function supplyUsdc(uint256 amount) external {
         require(usdcToken.transferFrom(msg.sender, address(this), amount), "Transfer failed");
         euint32 encryptedAmount = TFHE.asEuint32(amount);
         collateralSupplied[msg.sender] = TFHE.add(collateralSupplied[msg.sender], encryptedAmount);
     }
 
+    /**
+     * @dev Allows a user to withdraw USDC from their collateral.
+     * @param amount The amount of USDC to withdraw.
+     *
+     * Requirements:
+     * - The caller must have enough collateral.
+     */
     function withdrawUsdc(uint256 amount) external {
         euint32 supplied = collateralSupplied[msg.sender];
         euint32 encryptedAmount = TFHE.asEuint32(amount);
@@ -48,8 +66,15 @@ contract FHEVMFacilitator is EIP712WithModifier {
         usdcToken.transfer(msg.sender, amount);
     }
 
-    // if the execution order of optimistic require causes issues with mint then lets convert to another pattern
-    // https://docs.inco.network/getting-started/solidity-+-tfhe/control-structures
+    /**
+     * @dev Mints encrypted GHO tokens to a specified account.
+     * @param account The address of the account to mint the tokens to.
+     * @param encryptedAmount The amount of tokens to mint, encrypted.
+     *
+     * Requirements:
+     * - The caller must have enough collateral.
+     * - The minted amount must be within the mintable cap.
+     */
     function mintEncryptedGho(address account, bytes calldata encryptedAmount) external {
         euint32 amount = TFHE.asEuint32(encryptedAmount);
         ebool hasEnoughCollateral = TFHE.le(TFHE.add(ghoBorrowed[account], amount), collateralSupplied[account]);
@@ -61,6 +86,14 @@ contract FHEVMFacilitator is EIP712WithModifier {
         TFHE.optReq(withinMintableCap);
     }
 
+    /**
+     * @dev Burns encrypted GHO tokens from a specified account.
+     * @param account The address of the account to burn the tokens from.
+     * @param encryptedAmount The amount of tokens to burn, encrypted.
+     *
+     * Requirements:
+     * - The caller must have a sufficient balance.
+     */
     function burnEncryptedGho(address account, bytes calldata encryptedAmount) external {
         euint32 amount = TFHE.asEuint32(encryptedAmount);
         ebool sufficientBalance = TFHE.le(amount, privateGho.encryptedBalance(account));
@@ -70,6 +103,13 @@ contract FHEVMFacilitator is EIP712WithModifier {
         currentMinted = TFHE.sub(currentMinted, amount);
     }
 
+    /**
+     * @dev Returns the max mintable GHO tokens for an account.
+     * @param account The address of the account.
+     * @param publicKey The public key of the account.
+     * @param signature The signature of the account.
+     * @return The re-encrypted max mintable amount.
+     */
     function getMaxMintableAmount(
         address account,
         bytes32 publicKey,
