@@ -7,7 +7,7 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 
 import "fhevm/lib/TFHE.sol";
-import { IGhoToken } from "./interfaces/IGhoToken.sol";
+import { IGhoToken } from "../interfaces/IGhoToken.sol";
 
 contract EncryptedGHO is EIP712WithModifier, AccessControl, IGhoToken {
     euint32 private totalSupply;
