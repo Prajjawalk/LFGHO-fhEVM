@@ -43,7 +43,7 @@ async function main() {
   console.log("Deploying encrypted GHO contract with the account:", incoAccount.address);
 
   const encryptedGHOFactory = await ethers.getContractFactory("EncryptedGHO");
-  const encryptedGHO = await encryptedGHOFactory.connect(incoAccount).deploy(incoAccount.address, incoAccount.address, incoAccount.address);
+  const encryptedGHO = await encryptedGHOFactory.connect(incoAccount).deploy();
 
   await encryptedGHO.waitForDeployment();
   const encryptedGHOAddress = await encryptedGHO.getAddress();

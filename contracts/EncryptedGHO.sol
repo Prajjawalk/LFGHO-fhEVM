@@ -96,7 +96,7 @@ contract EncryptedGHO is EIP712WithModifier, AccessControl, IGhoToken {
         bytes calldata signature
     ) public view onlySignedPublicKey(publicKey, signature) returns (bytes memory) {
         return TFHE.reencrypt(balances[msg.sender], publicKey, 0);
-    }
+    } 
 
     function encryptedBalance(address account) external view returns (euint32) {
         return balances[account];
