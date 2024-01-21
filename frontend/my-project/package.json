@@ -14,6 +14,8 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "connectkit": "^1.6.0",
+    "ethers": "^5.7.2",
+    "flowbite-react": "^0.7.2",
     "lucide-react": "^0.312.0",
     "next": "14.0.4",
     "pino-pretty": "^10.3.1",

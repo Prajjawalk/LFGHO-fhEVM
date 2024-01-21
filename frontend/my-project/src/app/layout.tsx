@@ -3,22 +3,39 @@ import "./globals.css";
 import Navbar from "./navbar/Navbar";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { WagmiConfig, createConfig } from "wagmi";
+import { WagmiConfig, configureChains, createConfig, mainnet, sepolia } from "wagmi";
 import { ConnectKitProvider, ConnectKitButton, getDefaultConfig } from "connectkit";
+import {inco} from "./chain";
+import { polygonMumbai } from "viem/chains";
+import { alchemyProvider } from "wagmi/providers/alchemy";
+import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 
 const inter = Inter({ subsets: ["latin"] });
+const alchemyId = String(process.env.NEXT_PUBLIC_ALCHEMY_ID);
+const { publicClient, chains } = configureChains(
+  [sepolia, polygonMumbai, inco],
+  [
+    alchemyProvider({ apiKey: alchemyId }),
+    jsonRpcProvider({
+      rpc: (chain) => {
+        if (chain.id !== inco.id) return null;
+        return { http: chain.rpcUrls.default };
+      },
+    }),
+  ],
+);
 
 const config = createConfig(
   getDefaultConfig({
     // Required API Keys
     alchemyId: process.env.ALCHEMY_ID, // or infuraId
     walletConnectProjectId: process.env.WALLETCONNECT_PROJECT_ID as string,
-
+    chains,
     // Required
-    appName: "Your App Name",
+    appName: "Privacy GHO",
 
     // Optional
-    appDescription: "Your App Description",
+    appDescription: "Privacy preserved GHO token",
     appUrl: "https://family.co", // your app's url
     appIcon: "https://family.co/logo.png", // your app's icon, no bigger than 1024x1024px (max. 1MB)
   }),
@@ -34,7 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={inter.className}>
-       
+
 
         <WagmiConfig config={config}>
       <ConnectKitProvider>
