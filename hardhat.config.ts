@@ -9,6 +9,7 @@ import { task } from "hardhat/config";
 import type { NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";
 import * as path from "path";
+import "@nomicfoundation/hardhat-verify";
 
 import "./tasks/accounts";
 import "./tasks/deployERC20";
@@ -151,6 +152,21 @@ const config: HardhatUserConfig = {
     cache: "./cache",
     sources: "./contracts",
     tests: "./test",
+  },
+  etherscan: {
+    apiKey: {
+      inco: "MSXGPUNM5XJKYEF5A8P53MHBSEM8HJG1R1"
+    },
+    customChains: [
+      {
+        network: "inco",
+        chainId: 9090,
+        urls: {
+          apiURL: "https://explorer.inco.network/api",
+          browserURL: "https://explorer.inco.network"
+        }
+      }
+    ]
   },
   solidity: {
     version: "0.8.19",
